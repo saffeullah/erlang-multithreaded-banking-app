@@ -29,11 +29,36 @@ customer_process(CustomerTuple) ->
 
 
 
-bank_process() ->
+bank_process(BankTuple) ->
+  {BankName, BankResources} = BankTuple,
+  io:format("Bank ~p:   from bank ~p~n", [BankName, BankResources]),
   receive
     {From, CustomerData} ->
-      % Process the received data here
-      io:format("Received data: ~p~n", [CustomerData])
+%%      io:format("Received data: ~p~n", [CustomerData]),
+      {CustomerName, LoanAmount} = CustomerData,
+      case BankResources >= LoanAmount of
+        true->
+          UpdatedBankResources = BankResources- LoanAmount,
+          io:format("Bank ~p: Loan accepted for customer ~p~n", [BankName, CustomerName]),
+          From ! {self(), {BankName, accepted}},
+          bank_process({BankName, UpdatedBankResources});
+        false ->
+          % Reject the loan
+          io:format("Bank ~p: Loan rejected for customer ~p~n", [BankName, CustomerName]),
+          From ! {self(), {BankName, rejected}},
+          bank_process(BankTuple) % Continue listening for requests
+
+
+
+
+  end
+
+
+
+
+
+
+
       % Send a reply if needed
 %%      Reply = process_data(CustomerData),
 %%      Reply = process_data(CustomerData),
@@ -50,7 +75,7 @@ create_processes(BankInfo, CustomerInfo) ->
 .
 
 create_bank_processes(BankInfo) ->
-  lists:map(fun({BankName, _}) -> {BankName, spawn_link(fun() -> bank_process() end)} end, BankInfo).
+  lists:map(fun({BankName, BankResources}) -> {BankName, spawn_link(fun() -> bank_process({BankName, BankResources}) end)} end, BankInfo).
 
 create_customer_processes(CustomerInfo, BankProcesses) ->
   lists:map(
