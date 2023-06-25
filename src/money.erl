@@ -13,12 +13,20 @@ customer_process(CustomerTuple) ->
   timer:sleep(RandomWaitTime),
   {CustomerName, Loan, BankProcesses} = CustomerTuple,
 
-%%  io:format("Customer: ~p, Loan: ~p, Banks: ~p~n", [CustomerName, Loan, BankProcesses]),
+  io:format("Customer: ~p, Loan: ~p, Banks: ~p~n", [CustomerName, Loan, BankProcesses]),
   RandomLoan = rand:uniform(50),
+  io:format("loan lelo "),
+  io:format("RandomLoan: ~p~n", [CustomerName]),
+
   Index = rand:uniform(length(BankProcesses) - 1) + 1,
   CustomerData = {CustomerName, RandomLoan},
-  {BankName, RandomBankProcessId} = lists:nth(Index, BankProcesses),
+%%  io:format("test"),
+%%  io:format("~p~n", [BankProcesses]),
+
+{BankName, RandomBankProcessId} = lists:nth(Index, BankProcesses),
   io:format("Customer ~p: Requesting loan ~p from bank ~p~n", [CustomerName, Loan, BankName]),
+  io:format("sent data: ~p~n", [CustomerData]),
+
   RandomBankProcessId ! CustomerData,
   receive
     {_, {BankName, accepted}} ->
@@ -35,6 +43,9 @@ customer_process(CustomerTuple) ->
       customer_process({CustomerName, Loan, remove_bank(BankName, BankProcesses)})
   end.
 
+remove_bank(_, []) -> [];
+remove_bank(BankName, [{BankName, _} | Rest]) -> remove_bank(BankName, Rest);
+remove_bank(BankName, [OtherBank | Rest]) -> [OtherBank | remove_bank(BankName, Rest)].
 
 
 
@@ -42,14 +53,14 @@ customer_process(CustomerTuple) ->
 
 bank_process(BankTuple) ->
   {BankName, BankResources} = BankTuple,
-  io:format("Bank ~p:   from bank ~p~n", [BankName, BankResources]),
+%%  io:format("Bank ~p:   from bank ~p~n", [BankName, BankResources]),
   receive
-    {From, CustomerData} ->
-%%      io:format("Received data: ~p~n", [CustomerData]),
-      {CustomerName, LoanAmount} = CustomerData,
-      case BankResources >= LoanAmount of
+    {From, {CustomerName, RandomLoan}} ->
+      io:format("Received data: ~p~n", [{CustomerName, RandomLoan}]),
+%%      {CustomerName, RandomLoan} = CustomerData,
+      case BankResources >= RandomLoan of
         true->
-          UpdatedBankResources = BankResources- LoanAmount,
+          UpdatedBankResources = BankResources- RandomLoan,
           io:format("Bank ~p: Loan accepted for customer ~p~n", [BankName, CustomerName]),
           From ! {self(), {BankName, accepted}},
           bank_process({BankName, UpdatedBankResources});
@@ -64,6 +75,7 @@ bank_process(BankTuple) ->
 
 
 
+
 create_processes(BankInfo, CustomerInfo) ->
   BankProcesses = create_bank_processes(BankInfo),
   timer:sleep(200),
@@ -71,7 +83,13 @@ create_processes(BankInfo, CustomerInfo) ->
 .
 
 create_bank_processes(BankInfo) ->
-  lists:map(fun({BankName, BankResources}) -> {BankName, spawn_link(fun() -> bank_process({BankName, BankResources}) end)} end, BankInfo).
+  lists:map(
+    fun({BankName, BankResources}) ->
+      {BankName, spawn_link(fun() -> bank_process({BankName, BankResources}) end)}
+
+    end,
+    BankInfo
+  ).
 
 create_customer_processes(CustomerInfo, BankProcesses) ->
   lists:map(
