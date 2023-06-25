@@ -1,52 +1,5 @@
 -module(money).
--export([start/1, run_customer_logic/1]).
-
-find_bank() ->
- Index  = rand:uniform()
-.
-
-run_customer_logic(Customer) ->
-  timer:sleep(200),
-  RandomAmount = rand:uniform(50),
-  io:format("Customer: ~p, Random Amount: ~p~n", [Customer, RandomAmount]).
-
-%%run_bank_logic(Bank) ->
-%%  receive
-%%
-%%  end.
-
-customer_process_spawn(Customer) ->
-  spawn(money,run_customer_logic, [Customer] ),
-  io:format("~p~n", [Customer]).
-
-bank_process_spawn(Bank) ->
-  spawn(money,run_bank_logic, [Bank] ),
-  io:format("~p~n", [Bank])
-.
-
-initialize_process_data(CustomerInfo, BankInfo) ->
-  lists:map(fun customer_process_spawn/1, CustomerInfo),
-  lists:map(fun bank_process_spawn/1, BankInfo)
-.
-
-hw()->
-  io:write("").
-hw(Aaa)->
-  io:write("").
-
-
-customer_process(CustomerTuple) ->
-  timer:sleep(200),
-  {CustomerName, Loan, BankProcesses} = CustomerTuple,
-  CustomerData = {CustomerName, Loan},
-  io:format("Customer: ~p, Loan: ~p, Banks: ~p~n", [CustomerName, Loan, BankProcesses]),
-  RandomLoan = rand:uniform(50),
-  Index = rand:uniform(length(BankProcesses)),
-  {BankName, RandomBankProcessId} = lists:nth(index, BankProcesses),
-  RandomBankProcessId ! CustomerData
-%%  io:format("Tuple size: ~p~n", [Index])
-  %%send loan request to that bank
-.
+-export([start/1]).
 
 
 %%bank_process(Customer) ->
@@ -54,6 +7,27 @@ customer_process(CustomerTuple) ->
 %%check if bank has that amount
 %%if yes than give loan
 %%.
+
+customer_process(CustomerTuple) ->
+  RandomWaitTime = rand:uniform(91) + 10,
+  timer:sleep(RandomWaitTime),
+  {CustomerName, Loan, BankProcesses} = CustomerTuple,
+
+%%  io:format("Customer: ~p, Loan: ~p, Banks: ~p~n", [CustomerName, Loan, BankProcesses]),
+  RandomLoan = rand:uniform(50),
+  Index = rand:uniform(length(BankProcesses) - 1) + 1,
+  CustomerData = {CustomerName, RandomLoan},
+  {BankName, RandomBankProcessId} = lists:nth(Index, BankProcesses),
+  io:format("Customer ~p: Requesting loan ~p from bank ~p~n", [CustomerName, Loan, BankName]),
+  RandomBankProcessId ! CustomerData,
+  receive
+    Response ->
+            io:format("Customer ~p: Received response ~p from bank ~p~n", [CustomerName, Response, BankName]),
+            customer_process(CustomerTuple) % Wait for response before making another request
+  end.
+
+
+
 
 bank_process() ->
   receive
@@ -76,7 +50,7 @@ create_processes(BankInfo, CustomerInfo) ->
 .
 
 create_bank_processes(BankInfo) ->
-  lists:map(fun({BankName, _}) -> {BankName, spawn_link(fun() -> hw() end)} end, BankInfo).
+  lists:map(fun({BankName, _}) -> {BankName, spawn_link(fun() -> bank_process() end)} end, BankInfo).
 
 create_customer_processes(CustomerInfo, BankProcesses) ->
   lists:map(
@@ -87,16 +61,13 @@ create_customer_processes(CustomerInfo, BankProcesses) ->
   ).
 
 
-
 start(Args) ->
   CustomerFile = lists:nth(1, Args),
   BankFile = lists:nth(2, Args),
   {ok, CustomerInfo} = file:consult(CustomerFile),
   {ok, BankInfo} = file:consult(BankFile),
   create_processes(BankInfo, CustomerInfo).
-%%  io:format("~p~n", CustomerInfo),
-%%  Size = length(CustomerInfo),
-%%  io:format("~p~n", [Size]).
+
 
 
 
