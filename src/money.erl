@@ -1,33 +1,21 @@
 -module(money).
 -export([start/1]).
 
-
-%%bank_process(Customer) ->
-%%receive loan amount
-%%check if bank has that amount
-%%if yes than give loan
-%%.
-
 customer_process(CustomerTuple) ->
   RandomWaitTime = rand:uniform(91) + 10,
   timer:sleep(RandomWaitTime),
   {CustomerName, Loan, BankProcesses} = CustomerTuple,
 
-  io:format("Customer: ~p, Loan: ~p, Banks: ~p~n", [CustomerName, Loan, BankProcesses]),
+%%  io:format("Customer: ~p, Loan: ~p, Banks: ~p~n", [CustomerName, Loan, BankProcesses]),
   RandomLoan = rand:uniform(50),
-  io:format("loan lelo "),
-  io:format("RandomLoan: ~p~n", [CustomerName]),
-
+%%  io:format("RandomLoan: ~p~n", [CustomerName]),
   Index = rand:uniform(length(BankProcesses) - 1) + 1,
   CustomerData = {CustomerName, RandomLoan},
-%%  io:format("test"),
-%%  io:format("~p~n", [BankProcesses]),
 
 {BankName, RandomBankProcessId} = lists:nth(Index, BankProcesses),
   io:format("Customer ~p: Requesting loan ~p from bank ~p~n", [CustomerName, Loan, BankName]),
-  io:format("sent data: ~p~n", [CustomerData]),
 
-  RandomBankProcessId ! CustomerData,
+  RandomBankProcessId ! {self(), CustomerData},
   receive
     {_, {BankName, accepted}} ->
       io:format("Customer ~p: Loan accepted by bank ~p~n", [CustomerName, BankName]),
@@ -46,7 +34,6 @@ customer_process(CustomerTuple) ->
 remove_bank(_, []) -> [];
 remove_bank(BankName, [{BankName, _} | Rest]) -> remove_bank(BankName, Rest);
 remove_bank(BankName, [OtherBank | Rest]) -> [OtherBank | remove_bank(BankName, Rest)].
-
 
 
 
