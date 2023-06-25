@@ -38,14 +38,14 @@ hw(Aaa)->
 customer_process(CustomerTuple) ->
   timer:sleep(200),
   {CustomerName, Loan, BankProcesses} = CustomerTuple,
+  CustomerData = {CustomerName, Loan},
   io:format("Customer: ~p, Loan: ~p, Banks: ~p~n", [CustomerName, Loan, BankProcesses]),
   RandomLoan = rand:uniform(50),
   Index = rand:uniform(length(BankProcesses)),
   {BankName, RandomBankProcessId} = lists:nth(index, BankProcesses),
-  RandomBankProcessId !
-  io:format("Tuple size: ~p~n", [Index])
-
-%%send loan request to that bank
+  RandomBankProcessId ! CustomerData
+%%  io:format("Tuple size: ~p~n", [Index])
+  %%send loan request to that bank
 .
 
 
@@ -54,6 +54,19 @@ customer_process(CustomerTuple) ->
 %%check if bank has that amount
 %%if yes than give loan
 %%.
+
+bank_process() ->
+  receive
+    {From, CustomerData} ->
+      % Process the received data here
+      io:format("Received data: ~p~n", [CustomerData])
+      % Send a reply if needed
+%%      Reply = process_data(CustomerData),
+%%      Reply = process_data(CustomerData),
+%%      From ! {self(), Reply}
+  end.
+
+
 
 
 create_processes(BankInfo, CustomerInfo) ->
