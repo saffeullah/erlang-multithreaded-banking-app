@@ -21,10 +21,21 @@ customer_process(CustomerTuple) ->
   io:format("Customer ~p: Requesting loan ~p from bank ~p~n", [CustomerName, Loan, BankName]),
   RandomBankProcessId ! CustomerData,
   receive
-    Response ->
-            io:format("Customer ~p: Received response ~p from bank ~p~n", [CustomerName, Response, BankName]),
-            customer_process(CustomerTuple) % Wait for response before making another request
+    {_, {BankName, accepted}} ->
+      io:format("Customer ~p: Loan accepted by bank ~p~n", [CustomerName, BankName]),
+      UpdatedLoan = Loan - RandomLoan,
+      case UpdatedLoan > 0 of
+        true ->
+        customer_process({CustomerName, UpdatedLoan, BankProcesses});
+        false ->
+        io:format("Customer ~p: Received all money. Loan objective fulfilled.~n", [CustomerName])
+      end;
+    {_, {BankName, rejected}} ->
+      io:format("Customer ~p: Loan rejected by bank ~p~n", [CustomerName, BankName]),
+      customer_process({CustomerName, Loan, remove_bank(BankName, BankProcesses)})
   end.
+
+
 
 
 
@@ -47,22 +58,7 @@ bank_process(BankTuple) ->
           io:format("Bank ~p: Loan rejected for customer ~p~n", [BankName, CustomerName]),
           From ! {self(), {BankName, rejected}},
           bank_process(BankTuple) % Continue listening for requests
-
-
-
-
-  end
-
-
-
-
-
-
-
-      % Send a reply if needed
-%%      Reply = process_data(CustomerData),
-%%      Reply = process_data(CustomerData),
-%%      From ! {self(), Reply}
+      end
   end.
 
 
