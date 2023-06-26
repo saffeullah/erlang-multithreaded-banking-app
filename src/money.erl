@@ -1,81 +1,48 @@
 -module(money).
 -export([start/1]).
-
-
-
-
-
-
-bank_process(BankTuple, Pid) ->
-  {BankName, BankResources} = BankTuple,
-%%  io:format("Bank ~p:   from bank ~p~n", [BankName, BankResources]),
-  receive
-    {From, {CustomerName, RandomLoan}} ->
-%%      io:format("Received data: ~p~n", [{CustomerName, RandomLoan}]),
-%%      {CustomerName, RandomLoan} = CustomerData,
-      case BankResources >= RandomLoan of
-        true->
-          UpdatedBankResources = BankResources- RandomLoan,
-          BankMessage = "$ The " ++ atom_to_list(BankName) ++ " bank approves a loan of " ++ integer_to_list(RandomLoan) ++ " dollar(s) to " ++ atom_to_list(CustomerName),
-%%          io:format("Bank ~p: Loan accepted for customer ~p~n", [BankName, CustomerName]),
-          ReportBankData = {BankName, UpdatedBankResources},
-
-          Pid ! {self(), BankMessage, ReportBankData},
-          From ! {self(), {BankName, accepted}},
-          bank_process({BankName, UpdatedBankResources}, Pid);
-        false ->
-          % Reject the loan
-%%          io:format("Bank ~p: Loan rejected for customer ~p~n", [BankName, CustomerName]),
-          BankMessage = "$ The " ++ atom_to_list(BankName) ++ " bank denies a loan of " ++ integer_to_list(RandomLoan) ++ " dollar(s) to " ++ atom_to_list(CustomerName),
-          Pid ! {self(), BankMessage},
-          From ! {self(), {BankName, rejected}},
-          bank_process(BankTuple, Pid) % Continue listening for requests
-      end
-  end.
-
-
-
+-import(bank, [create_bank_processes/2]).
+-import(customer,[create_customer_processes/3]).
 
 
 create_processes(BankInfo, CustomerInfo, Pid) ->
   BankProcesses = create_bank_processes(BankInfo, Pid),
   timer:sleep(200),
-  CustomerProcesses = create_customer_processes(CustomerInfo, BankProcesses,Pid)
+  create_customer_processes(CustomerInfo, BankProcesses,Pid)
 .
 
-create_bank_processes(BankInfo, Pid) ->
-  lists:map(
-    fun({BankName, BankResources}) ->
-      {BankName, spawn_link(fun() -> bank_process({BankName, BankResources}, Pid) end)}
+%%listen_customers(BankInfo) ->
+%%  receive
+%%    { Message, ReportBank} ->
+%%%%      io:format("Received Message~p~n", [Message]),
+%%      {BankName, Balance} = ReportBank,
+%%      UpdatedBankInfo = add_property_if_match(BankInfo, BankName, Balance),
+%%      listen_customers(UpdatedBankInfo),
+%%      String = "tewst: ",
+%%      io:format("~s~n", [String]),
+%%      io:format("fdsfds~p~n", [UpdatedBankInfo]),
+%%      listen_customers(BankInfo)
+%%  after 1000 ->
+%%  io:format("~s~n Finished")
+%%%%    print_summary(BankInfo)
+%%  end.
 
-    end,
-    BankInfo
-  ).
-
-create_customer_processes(CustomerInfo, BankProcesses, Pid) ->
-  lists:map(
-    fun({CustomerName, Loan}) ->
-      {CustomerName, Loan, BankProcesses, spawn_link(fun() -> customer_process({CustomerName, Loan, BankProcesses}, Pid) end)}
-    end,
-    CustomerInfo
-  ).
-
-
-
-
-listen_customers(BankInfo) ->
+listen_customers(BankInfo , CustomerInfo) ->
   receive
-    {_, Message, ReportBank} ->
+    {Message, ReportBank} ->
       io:format("~s~n", [Message]),
-      io:format("BankReport: ~p~n", [ReportBank]),
       {BankName, Balance} = ReportBank,
       UpdatedBankInfo = add_property_if_match(BankInfo, BankName, Balance),
-      io:format("Updated BankInfo: ~p~n", [UpdatedBankInfo]),
-
-      listen_customers(UpdatedBankInfo)
+      listen_customers(UpdatedBankInfo, CustomerInfo);
+      {Message} ->
+        io:format("~s~n", [Message]),
+      listen_customers(BankInfo, CustomerInfo)
   after 5000 ->
-    print_summary(BankInfo)
+%%    io:format("Finished~n")
+  print_summary(BankInfo)
   end.
+
+
+
 
 add_property_if_match(List, BankName, Balance) ->
   lists:map(fun(Tuple) ->
@@ -105,7 +72,7 @@ start(Args) ->
   {ok, BankInfo} = file:consult(BankFile),
   Pid = self(),
   create_processes(BankInfo, CustomerInfo, Pid),
-  listen_customers(BankInfo).
+  listen_customers(BankInfo,CustomerInfo).
 
 
 

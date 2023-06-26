@@ -8,10 +8,6 @@ create_bank_processes(BankInfo, Pid) ->
     end,
     BankInfo
   ).
-%%         io:format("From Bank Process: ~p~n", [BankMessage]),
-%% io:format("Bank ~p: Loan accepted for customer ~p~n", [BankName, CustomerName]),
-%%          io:format("Bank ~p: Loan accepted for customer ~p~n", [BankName, CustomerName]),
-
 
 
 bank_process(BankTuple, Pid) ->
@@ -25,16 +21,17 @@ bank_process(BankTuple, Pid) ->
         true->
           UpdatedBankResources = BankResources- RandomLoan,
           BankMessage = "$ The " ++ atom_to_list(BankName) ++ " bank approves a loan of " ++ integer_to_list(RandomLoan) ++ " dollar(s) to " ++ atom_to_list(CustomerName),
+%%          io:format("Bank ~p: Loan accepted for customer ~p~n", [BankName, CustomerName]),
           ReportBankData = {BankName, UpdatedBankResources},
-%%           io:format("From Bank Process ~p: UpdatedBankResources ~p~n", [BankName, UpdatedBankResources]),
-          Pid ! { BankMessage, ReportBankData},
+          io:format("Bank ~p: Loan accepted for customer ~p~n", [BankName, CustomerName]),
+%%          Pid ! {self(), BankMessage, ReportBankData},
           From ! {self(), {BankName, accepted}},
           bank_process({BankName, UpdatedBankResources}, Pid);
         false ->
           % Reject the loan
-%%          io:format("Bank ~p: Loan rejected for customer ~p~n", [BankName, CustomerName]),
+          io:format("Bank ~p: Loan rejected for customer ~p~n", [BankName, CustomerName]),
           BankMessage = "$ The " ++ atom_to_list(BankName) ++ " bank denies a loan of " ++ integer_to_list(RandomLoan) ++ " dollar(s) to " ++ atom_to_list(CustomerName),
-          Pid ! {BankMessage, BankTuple},
+%%          Pid ! {self(), BankMessage},
           From ! {self(), {BankName, rejected}},
           bank_process(BankTuple, Pid) % Continue listening for requests
       end
