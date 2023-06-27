@@ -9,7 +9,6 @@ create_bank_processes(BankInfo, Pid) ->
     end,
     BankInfo
   )
-  % ,io:format("Bank thread exited~n")
   .
 
 
@@ -35,27 +34,3 @@ bank_process(BankTuple, Pid) ->
   end
   ,io:format("Bank thread exited~n")
   .
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-%%         io:format("From Bank Process: ~p~n", [BankMessage]),
-%% io:format("Bank ~p: Loan accepted for customer ~p~n", [BankName, CustomerName]),
-%%          io:format("Bank ~p: Loan accepted for customer ~p~n", [BankName, CustomerName]),
-%%      {CustomerName, RandomLoan} = CustomerData,
-%%           io:format("From Bank Process ~p: UpdatedBankResources ~p~n", [BankName, UpdatedBankResources]),
-%%  io:format("Bank ~p:   from bank ~p~n", [BankName, BankResources]),
-
-% Reject the loan
-%%          io:format("Bank ~p: Loan rejected for customer ~p~n", [BankName, CustomerName]),

@@ -1,0 +1,90 @@
+? bob requests a loan of 46 dollar(s) from the ing bank
+$ The ing bank approves a loan of 46 dollar(s) to bob
+3 pattern{bob,46}
+? jill requests a loan of 42 dollar(s) from the rbc bank
+$ The rbc bank approves a loan of 42 dollar(s) to jill
+3 pattern{jill,42}
+? bob requests a loan of 47 dollar(s) from the rbc bank
+$ The rbc bank approves a loan of 47 dollar(s) to bob
+3 pattern{bob,47}
+? joe requests a loan of 9 dollar(s) from the ing bank
+$ The ing bank approves a loan of 9 dollar(s) to joe
+3 pattern{joe,9}
+? jill requests a loan of 38 dollar(s) from the rbc bank
+? bob requests a loan of 46 dollar(s) from the rbc bank
+Customer bob: Received all money. Loan objective fulfilled.
+$ The rbc bank approves a loan of 38 dollar(s) to jill
+3 pattern{jill,38}
+$ The rbc bank approves a loan of 46 dollar(s) to bob
+3 pattern{bob,46}
+? jill requests a loan of 47 dollar(s) from the bmo bank
+$ The bmo bank approves a loan of 47 dollar(s) to jill
+3 pattern{jill,47}
+? jill requests a loan of 5 dollar(s) from the ing bank
+$ The ing bank approves a loan of 5 dollar(s) to jill
+3 pattern{jill,5}
+? joe requests a loan of 39 dollar(s) from the bmo bank
+$ The bmo bank approves a loan of 39 dollar(s) to joe
+3 pattern{joe,39}
+? jill requests a loan of 18 dollar(s) from the ing bank
+$ The ing bank approves a loan of 18 dollar(s) to jill
+3 pattern{jill,18}
+? joe requests a loan of 16 dollar(s) from the rbc bank
+$ The rbc bank approves a loan of 16 dollar(s) to joe
+3 pattern{joe,16}
+? joe requests a loan of 29 dollar(s) from the ing bank
+$ The ing bank approves a loan of 29 dollar(s) to joe
+3 pattern{joe,29}
+? jill requests a loan of 38 dollar(s) from the bmo bank
+$ The bmo bank approves a loan of 38 dollar(s) to jill
+3 pattern{jill,38}
+? joe requests a loan of 36 dollar(s) from the ing bank
+$ The ing bank approves a loan of 36 dollar(s) to joe
+3 pattern{joe,36}
+? jill requests a loan of 17 dollar(s) from the bmo bank
+$ The bmo bank approves a loan of 17 dollar(s) to jill
+3 pattern{jill,17}
+? joe requests a loan of 3 dollar(s) from the ing bank
+$ The ing bank approves a loan of 3 dollar(s) to joe
+3 pattern{joe,3}
+? jill requests a loan of 14 dollar(s) from the bmo bank
+$ The bmo bank approves a loan of 14 dollar(s) to jill
+3 pattern{jill,14}
+? jill requests a loan of 18 dollar(s) from the bmo bank
+$ The bmo bank approves a loan of 18 dollar(s) to jill
+3 pattern{jill,18}
+? jill requests a loan of 34 dollar(s) from the rbc bank
+$ The rbc bank approves a loan of 34 dollar(s) to jill
+3 pattern{jill,34}
+? joe requests a loan of 37 dollar(s) from the rbc bank
+$ The rbc bank approves a loan of 37 dollar(s) to joe
+Customer joe: Received all money. Loan objective fulfilled.
+3 pattern{joe,37}
+? jill requests a loan of 19 dollar(s) from the bmo bank
+$ The bmo bank approves a loan of 19 dollar(s) to jill
+3 pattern{jill,19}
+? jill requests a loan of 37 dollar(s) from the rbc bank
+$ The rbc bank approves a loan of 37 dollar(s) to jill
+3 pattern{jill,37}
+? jill requests a loan of 42 dollar(s) from the rbc bank
+$ The rbc bank approves a loan of 42 dollar(s) to jill
+3 pattern{jill,42}
+? jill requests a loan of 42 dollar(s) from the bmo bank
+$ The bmo bank approves a loan of 42 dollar(s) to jill
+3 pattern{jill,42}
+? jill requests a loan of 6 dollar(s) from the ing bank
+$ The ing bank approves a loan of 6 dollar(s) to jill
+3 pattern{jill,6}
+? jill requests a loan of 38 dollar(s) from the bmo bank
+$ The bmo bank approves a loan of 38 dollar(s) to jill
+Customer jill: Received all money. Loan objective fulfilled.
+3 pattern{jill,38}
+
+
+
+
+
+
+
+total Loan got  = 763
+total loan by bank = 339+272+152 =763

@@ -29,15 +29,9 @@ listen_customers(BankInfo , CustomerInfo) ->
      UpdatedBankInfo = add_property_if_match(BankInfo, BankName, Balance),
      UpdatedCustomerInfo = track_customer_obtained_loan(CustomerInfo, CustomerName, LoanRequest),
       listen_customers(UpdatedBankInfo, UpdatedCustomerInfo)
-%%      _ ->
-%%        io:format("nothing~s~n", ["nothing"]),
-% Ignore any other messages that don't match the specified patterns
-%%  listen_customers(BankInfo, CustomerInfo)
 
   after 2000 ->
-%%   io:format("Finished~n"),
-%%   io:format("BankInfo: ~p~n", [BankInfo])
-print_summary(BankInfo, CustomerInfo)
+  print_summary(BankInfo, CustomerInfo)
   end.
 
 track_customer_obtained_loan(List, CustomerName, LoanAmount) ->
@@ -59,7 +53,6 @@ add_property_if_match(List, BankName, Balance) ->
     end
             end, List).
 
-
 print_summary(BankInfo, CustomerInfo) ->
 io:format("~n~s~n~n", ["**Banking Report **"]),
   io:format("~s~n", ["Customers: "]),
@@ -77,9 +70,6 @@ io:format("~n~s~n~n", ["**Banking Report **"]),
     BankInfo
   ).
 
-
-
-
 start(Args) ->
   CustomerFile = lists:nth(1, Args),
   BankFile = lists:nth(2, Args),
@@ -90,14 +80,3 @@ start(Args) ->
   listen_customers(BankInfo,CustomerInfo),
   io:format("start Finished~n")
 .
-
-
-
-
-
-
-
-
-
-
-
