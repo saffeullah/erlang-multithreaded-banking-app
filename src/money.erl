@@ -23,7 +23,7 @@ listen_customers(BankInfo , CustomerInfo) ->
     {bankstatus3, Message, ReportBank, ReportCustomer} ->
       io:format("~s~n", [Message]),
 %%      io:format("3 pattern~p~n", [ReportBank]),
-      io:format("3 pattern~p~n", [ReportCustomer]),
+%%      io:format("3 pattern~p~n", [ReportCustomer]),
      {BankName, Balance} = ReportBank,
      {CustomerName, LoanRequest} = ReportCustomer,
      UpdatedBankInfo = add_property_if_match(BankInfo, BankName, Balance),
@@ -62,13 +62,30 @@ io:format("~n~s~n~n", ["**Banking Report **"]),
     end,
     CustomerInfo
   ),
+  print_total_customer_loan(CustomerInfo),
   io:format("~n~s~n", ["Banks: "]),
   lists:foreach(
     fun({BankName, TotalResources, RemainingAmount}) ->
-      io:format("~p: ,  original: ~p, balance: ~p~n", [BankName, TotalResources, RemainingAmount])
+      io:format("~p:, original ~p, balance ~p~n", [BankName, TotalResources, RemainingAmount])
     end,
-    BankInfo
-  ).
+    BankInfo),
+  print_total_loan_dispersed(BankInfo)
+.
+
+print_total_customer_loan(CustomerInfo) ->
+  {TotalObjective, TotalBalance} = lists:foldl(fun({_, Objective, Balance}, {AccObjective, AccBalance}) ->
+    {AccObjective + Objective, AccBalance + Balance}
+                                               end, {0, 0}, CustomerInfo),
+  io:format("~s~n", ["-----"]),
+  io:format("Total: objective ~p, received ~p~n", [TotalObjective, TotalBalance]).
+
+print_total_loan_dispersed(BankInfo) ->
+  {TotalObjective, TotalBalance} = lists:foldl(fun({_, Objective, Balance}, {AccObjective, AccBalance}) ->
+  {AccObjective + Objective, AccBalance + Balance}
+  end, {0, 0}, BankInfo),
+  io:format("~s~n", ["-----"]),
+  io:format("Total: original ~p, loaned ~p~n", [TotalObjective, TotalObjective - TotalBalance]).
+
 
 start(Args) ->
   CustomerFile = lists:nth(1, Args),
@@ -76,7 +93,9 @@ start(Args) ->
   {ok, CustomerInfo} = file:consult(CustomerFile),
   {ok, BankInfo} = file:consult(BankFile),
   Pid = self(),
+  String1 = "** The financial market is opening for the day **",
+  String2 =  "Starting transaction log...",
+  io:format("~n~s~n~n~s~n", [String1, String2] ),
   create_processes(BankInfo, CustomerInfo, Pid),
-  listen_customers(BankInfo,CustomerInfo),
-  io:format("start Finished~n")
+  listen_customers(BankInfo,CustomerInfo)
 .
