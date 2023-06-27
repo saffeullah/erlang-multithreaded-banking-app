@@ -13,32 +13,41 @@ create_processes(BankInfo, CustomerInfo, Pid) ->
 listen_customers(BankInfo , CustomerInfo) ->
   receive
     {bankstatus, Message} ->
-      io:format("1 pattern ~s~n", [Message]),
+      io:format("~s~n", [Message]),
       listen_customers(BankInfo, CustomerInfo);
     {bankstatus2, Message, ReportBank} ->
-      io:format("two pattern ~s~n", [Message]),
+      io:format("~s~n", [Message]),
       {BankName, Balance} = ReportBank,
       UpdatedBankInfo = add_property_if_match(BankInfo, BankName, Balance),
       listen_customers(UpdatedBankInfo, CustomerInfo);
     {bankstatus3, Message, ReportBank, ReportCustomer} ->
       io:format("~s~n", [Message]),
-      io:format("3 pattern~p~n", [ReportBank]),
+%%      io:format("3 pattern~p~n", [ReportBank]),
       io:format("3 pattern~p~n", [ReportCustomer]),
      {BankName, Balance} = ReportBank,
+     {CustomerName, LoanRequest} = ReportCustomer,
      UpdatedBankInfo = add_property_if_match(BankInfo, BankName, Balance),
-      listen_customers(UpdatedBankInfo, CustomerInfo)
+     UpdatedCustomerInfo = track_customer_obtained_loan(CustomerInfo, CustomerName, LoanRequest),
+      listen_customers(UpdatedBankInfo, UpdatedCustomerInfo)
 %%      _ ->
 %%        io:format("nothing~s~n", ["nothing"]),
 % Ignore any other messages that don't match the specified patterns
 %%  listen_customers(BankInfo, CustomerInfo)
 
   after 2000 ->
-   io:format("Finished~n"),
-   io:format("BankInfo: ~p~n", [BankInfo])
-%  print_summary(BankInfo)
+%%   io:format("Finished~n"),
+%%   io:format("BankInfo: ~p~n", [BankInfo])
+print_summary(BankInfo, CustomerInfo)
   end.
 
-
+track_customer_obtained_loan(List, CustomerName, LoanAmount) ->
+  lists:map(fun(Tuple) ->
+    case Tuple of
+      {MatchName, OriginalLoanRequest} when MatchName == CustomerName -> {MatchName, OriginalLoanRequest, LoanAmount};
+      {MatchName, OriginalLoanRequest, OriginalLoan} when MatchName == CustomerName -> {MatchName, OriginalLoanRequest, OriginalLoan + LoanAmount};
+      _ -> Tuple
+    end
+            end, List).
 
 
 add_property_if_match(List, BankName, Balance) ->
@@ -51,15 +60,24 @@ add_property_if_match(List, BankName, Balance) ->
             end, List).
 
 
-print_summary(BankInfo) ->
-  String = "Banks: ",
-  io:format("~s~n", [String]),
+print_summary(BankInfo, CustomerInfo) ->
+io:format("~n~s~n~n", ["**Banking Report **"]),
+  io:format("~s~n", ["Customers: "]),
+  lists:foreach(
+    fun({CustomerName, OriginalLoanRequest, LoanGiven}) ->
+      io:format("~p: , objective  ~p , received ~p~n", [CustomerName, OriginalLoanRequest, LoanGiven])
+    end,
+    CustomerInfo
+  ),
+  io:format("~n~s~n", ["Banks: "]),
   lists:foreach(
     fun({BankName, TotalResources, RemainingAmount}) ->
-      io:format("Bank: ~p: original: ~p, balance: ~p~n", [BankName, TotalResources, RemainingAmount])
+      io:format("~p: ,  original: ~p, balance: ~p~n", [BankName, TotalResources, RemainingAmount])
     end,
     BankInfo
   ).
+
+
 
 
 start(Args) ->

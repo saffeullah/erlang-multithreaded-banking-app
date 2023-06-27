@@ -7,11 +7,11 @@ customer_process(CustomerTuple, Pid) ->
   timer:sleep(RandomWaitTime),
   {CustomerName, Loan, BankProcesses} = CustomerTuple,
   RandomLoan = rand:uniform(50),
-  io:format("Length of banking array = : ~p~n", [length(BankProcesses)]),
+%%  io:format("Length of banking array = : ~p~n", [length(BankProcesses)]),
   Index  = rand:uniform(length(BankProcesses)),
   CustomerData = {CustomerName, RandomLoan},
 %%  io:format("Length of BankProcesses: ~p~n", [length(BankProcesses)]),
-  io:format("Random Index: ~p~n", [Index]),
+%%  io:format("Random Index: ~p~n", [Index]),
 
   {BankName, RandomBankProcessId} = lists:nth(Index, BankProcesses),
   BankMessage = "? " ++ atom_to_list(CustomerName) ++ " requests a loan of " ++ integer_to_list(RandomLoan) ++ " dollar(s) from the " ++ atom_to_list(BankName) ++ " bank",
