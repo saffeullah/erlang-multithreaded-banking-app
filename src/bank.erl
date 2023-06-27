@@ -11,7 +11,6 @@ create_bank_processes(BankInfo, Pid) ->
   )
   .
 
-
 bank_process(BankTuple, Pid) ->
   {BankName, BankResources} = BankTuple,
   receive
@@ -32,5 +31,4 @@ bank_process(BankTuple, Pid) ->
           bank_process(BankTuple, Pid) % Continue listening for requests
       end
   end
-  ,io:format("Bank thread exited~n")
-  .
+  ,io:format("Bank thread exited~n").

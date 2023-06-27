@@ -1,26 +1,5 @@
-
 -module(customer).
 -export([create_customer_processes/3]).
-
-return(Value) ->
-  Value.
-
-
-validate_loan(CustomerInfo, LoanObtained) ->
-  {_, RequiredLoan} = CustomerInfo,
-  RemainingLoan = RequiredLoan - LoanObtained,
-  io:format("RequiredLoan= ~p , LoanObtained =  ~p~n", [RequiredLoan, LoanObtained]),
-
-  GiveLoan = if
-               RemainingLoan >= 50 ->
-                 rand:uniform(50);
-               RemainingLoan > 0 ->
-                 rand:uniform(RemainingLoan);
-               true ->
-                 0
-             end,
-  return(GiveLoan)
-  .
 
 customer_process(CustomerTuple, Pid, LoanObtained) ->
 
@@ -35,6 +14,7 @@ customer_process(CustomerTuple, Pid, LoanObtained) ->
                end,
   Index  = rand:uniform(length(BankProcesses)),
   CustomerData = {CustomerName, RandomLoan},
+%%  io:format("bank process length ~p~n", [length(BankProcesses)]),
   {BankName, RandomBankProcessId} = lists:nth(Index, BankProcesses),
   BankMessage = "? " ++ atom_to_list(CustomerName) ++ " requests a loan of " ++ integer_to_list(RandomLoan) ++ " dollar(s) from the " ++ atom_to_list(BankName) ++ " bank",
  Pid ! {bankstatus, BankMessage},
@@ -51,10 +31,11 @@ customer_process(CustomerTuple, Pid, LoanObtained) ->
       end;
     {_, {BankName, rejected}} ->
       RemovedBanks = remove_bank(BankName, BankProcesses),
-      customer_process({CustomerName, Loan, RemovedBanks}, Pid, LoanObtained)
-  end
-
-  .
+      if length(RemovedBanks) > 0 ->
+      customer_process({CustomerName, Loan, RemovedBanks}, Pid, LoanObtained);
+        true -> false
+      end
+  end.
 
 remove_bank(_, []) -> [];
 remove_bank(BankName, [{BankName, _} | Rest]) -> remove_bank(BankName, Rest);
@@ -67,5 +48,4 @@ create_customer_processes(CustomerInfo, BankProcesses, Pid) ->
       {CustomerName, Loan, BankProcesses, spawn_link(fun() -> customer_process({CustomerName, Loan, BankProcesses}, Pid, 0) end)}
     end,
     CustomerInfo
-  )
-  .
+  ).

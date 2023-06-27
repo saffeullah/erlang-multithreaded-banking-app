@@ -3,12 +3,10 @@
 -import(bank, [create_bank_processes/2]).
 -import(customer,[create_customer_processes/3]).
 
-
 create_processes(BankInfo, CustomerInfo, Pid) ->
   BankProcesses = create_bank_processes(BankInfo, Pid),
   timer:sleep(200),
   create_customer_processes(CustomerInfo, BankProcesses,Pid).
-
 
 listen_customers(BankInfo , CustomerInfo) ->
   receive
@@ -69,8 +67,7 @@ io:format("~n~s~n~n", ["**Banking Report **"]),
       io:format("~p:, original ~p, balance ~p~n", [BankName, TotalResources, RemainingAmount])
     end,
     BankInfo),
-  print_total_loan_dispersed(BankInfo)
-.
+  print_total_loan_dispersed(BankInfo).
 
 print_total_customer_loan(CustomerInfo) ->
   {TotalObjective, TotalBalance} = lists:foldl(fun({_, Objective, Balance}, {AccObjective, AccBalance}) ->
@@ -86,7 +83,6 @@ print_total_loan_dispersed(BankInfo) ->
   io:format("~s~n", ["-----"]),
   io:format("Total: original ~p, loaned ~p~n", [TotalObjective, TotalObjective - TotalBalance]).
 
-
 start(Args) ->
   CustomerFile = lists:nth(1, Args),
   BankFile = lists:nth(2, Args),
@@ -97,5 +93,4 @@ start(Args) ->
   String2 =  "Starting transaction log...",
   io:format("~n~s~n~n~s~n", [String1, String2] ),
   create_processes(BankInfo, CustomerInfo, Pid),
-  listen_customers(BankInfo,CustomerInfo)
-.
+  listen_customers(BankInfo,CustomerInfo).
